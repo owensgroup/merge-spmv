@@ -37,6 +37,7 @@
 #include <fstream>
 
 #include <cusparse.h>
+#include <cuda_profiler_api.h>
 
 // Ensure printing of CUDA runtime errors to console
 #define CUB_STDERR
@@ -556,10 +557,10 @@ void RunTest(
     CubDebugExit(cudaMemcpy(params.d_vector_x,          vector_x,                   sizeof(ValueT) * csr_matrix.num_cols, cudaMemcpyHostToDevice));
 
 	// Merge-based
-    if (!g_quiet) printf("\n\n");
+    /*if (!g_quiet) printf("\n\n");
     printf("Merge-based CsrMV, "); fflush(stdout);
     avg_ms = TestGpuMergeCsrmv(vector_y_in, vector_y_out, params, timing_iterations, setup_ms);
-    DisplayPerf(device_giga_bandwidth, setup_ms, avg_ms, csr_matrix);
+    DisplayPerf(device_giga_bandwidth, setup_ms, avg_ms, csr_matrix);*/
 
     // Initialize cuSparse
     cusparseHandle_t cusparse;
@@ -568,14 +569,16 @@ void RunTest(
 	// cuSPARSE CsrMV
     if (!g_quiet) printf("\n\n");
     printf("cuSPARSE CsrMV, "); fflush(stdout);
+    cudaProfilerStart();
     avg_ms = TestCusparseCsrmv(vector_y_in, vector_y_out, params, timing_iterations, setup_ms, cusparse);
+    cudaProfilerStop();
     DisplayPerf(device_giga_bandwidth, setup_ms, avg_ms, csr_matrix);
 
 	// cuSPARSE HybMV
-    if (!g_quiet) printf("\n\n");
+    /*if (!g_quiet) printf("\n\n");
     printf("cuSPARSE HybMV, "); fflush(stdout);
     avg_ms = TestCusparseHybmv(vector_y_in, vector_y_out, params, timing_iterations, setup_ms, cusparse);
-    DisplayPerf(device_giga_bandwidth, setup_ms, avg_ms, csr_matrix);
+    DisplayPerf(device_giga_bandwidth, setup_ms, avg_ms, csr_matrix);*/
 
     // Cleanup
     if (params.d_values)            CubDebugExit(g_allocator.DeviceFree(params.d_values));
